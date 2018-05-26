@@ -103,7 +103,7 @@ word icode = [
 	imem_error: INOP;
 	1: imem_icode;		# Default: get from instruction memory
 ];
-
+ 
 # Determine instruction function
 word ifun = [
 	imem_error: FNONE;
@@ -142,14 +142,14 @@ word srcB = [
 ## What register should be used as the E destination?
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
-	icode in { IIRMOVQ, IOPQ, IMULQ } : rB;
+	icode in { IIRMOVQ, IOPQ, IIADDQ, IMULQ } : rB;
 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't write any register
 ];
 
 ## What register should be used as the M destination?
 word dstM = [
-	icode in { IMRMOVQ, IPOPQ, IIADDQ, IMRMOVB } : rA;
+	icode in { IMRMOVQ, IPOPQ, IMRMOVB } : rA;
 	1 : RNONE;  # Don't write any register
 ];
 
@@ -157,8 +157,8 @@ word dstM = [
 
 ## Select input A to ALU
 word aluA = [
-	icode in { IRRMOVQ, IOPQ } : valA;
-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IRMMOVB, IMRMOVB } : valC;
+	icode in { IRRMOVQ, IOPQ, IMULQ } : valA;
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ ,IRMMOVB, IMRMOVB } : valC;
 	icode in { ICALL, IPUSHQ } : -8;
 	icode in { IRET, IPOPQ } : 8;
 	# Other instructions don't need ALU
@@ -167,8 +167,8 @@ word aluA = [
 ## Select input B to ALU
 word aluB = [
 	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
-		      IPUSHQ, IRET, IPOPQ, IRMMOVB, IMRMOVB } : valB;
-	icode in { IRRMOVQ, IIRMOVQ } : 0;
+		      IPUSHQ, IRET, IPOPQ, IMULQ ,IRMMOVB, IMRMOVB } : valB;
+	icode in { IRRMOVQ, IIRMOVQ, IIADDQ } : 0;
 	# Other instructions don't need ALU
 ];
 
@@ -184,7 +184,7 @@ bool set_cc = icode in { IOPQ };
 ################ Memory Stage    ###################################
 
 ## Set read control signal
-bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET, IMRMOVB };
+bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET, IMULQ ,IMRMOVB };
 
 ## Set write control signal
 bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL, IRMMOVB };
@@ -192,7 +192,7 @@ bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL, IRMMOVB };
 ## Select memory address
 word mem_addr = [
 	icode in { IRMMOVQ, IPUSHQ, ICALL, IRMMOVB } : valE;
-	icode in { IPOPQ, IRET } : valA;
+	icode in { IPOPQ, IRET, IMULQ } : valA;
 	# Other instructions don't need address
 ];
 
