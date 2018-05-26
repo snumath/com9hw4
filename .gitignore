@@ -1,0 +1,7 @@
+misc/isa.o
+misc/isacore.o
+misc/yas.o
+misc/yas-grammar.o
+misc/yis
+misc/yis.o
+misc/yas-grammar.c
