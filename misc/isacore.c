@@ -65,7 +65,7 @@ word_t compute_alu(alu_t op, word_t argA, word_t argB)
     case A_XOR:
 	val = argA^argB;
 	break;
-	case A_MUL;
+	case A_MUL:
 	val = argA*argB;
 	break;
     default:
@@ -93,8 +93,8 @@ cc_t compute_cc(alu_t op, word_t argA, word_t argB)
     case A_XOR:
 	ovf = FALSE;
 	break;
-	case A_MUL;
-	ovf = (argA != 0 && ((argA * arg B)/argA) != argB);
+	case A_MUL:
+	ovf = (argA != 0 && ((argA * argB)/argA) != argB);
 	break;
     default:
 	ovf = FALSE;
