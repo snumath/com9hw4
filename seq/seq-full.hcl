@@ -40,6 +40,9 @@ wordsig IPUSHQ	'I_PUSHQ'
 wordsig IPOPQ	'I_POPQ'
 # Instruction code for iaddq instruction
 wordsig IIADDQ	'I_IADDQ'
+wordsig IMULQ	'I_MULQ'
+wordsig IRMMOVB	'I_RMMOVB'
+wordsig IMRMOVB	'I_MRMOVB'
 
 ##### Symbolic represenations of Y86-64 function codes                  #####
 wordsig FNONE    'F_NONE'        # Default function code
@@ -109,29 +112,29 @@ word ifun = [
 
 bool instr_valid = icode in 
 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
-	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
+	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IIADDQ, IMULQ, IRMMOVB, IMRMOVB };
 
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
-		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
+		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IIADDQ, IMULQ, IRMMOVB, IMRMOVB };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ, IRMMOVB, IMRMOVB };
 
 ################ Decode Stage    ###################################
 
 ## What register should be used as the A source?
 word srcA = [
-	icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ  } : rA;
+	icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ, IMULQ, IRMMOVB } : rA;
 	icode in { IPOPQ, IRET } : RRSP;
 	1 : RNONE; # Don't need register
 ];
 
 ## What register should be used as the B source?
 word srcB = [
-	icode in { IOPQ, IRMMOVQ, IMRMOVQ  } : rB;
+	icode in { IOPQ, IRMMOVQ, IMRMOVQ, IIADDQ, IMULQ, IRMMOVB, IMRMOVB } : rB;
 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't need register
 ];
@@ -139,14 +142,14 @@ word srcB = [
 ## What register should be used as the E destination?
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
-	icode in { IIRMOVQ, IOPQ} : rB;
+	icode in { IIRMOVQ, IOPQ, IMULQ } : rB;
 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't write any register
 ];
 
 ## What register should be used as the M destination?
 word dstM = [
-	icode in { IMRMOVQ, IPOPQ } : rA;
+	icode in { IMRMOVQ, IPOPQ, IIADDQ, IMRMOVB } : rA;
 	1 : RNONE;  # Don't write any register
 ];
 
@@ -155,7 +158,7 @@ word dstM = [
 ## Select input A to ALU
 word aluA = [
 	icode in { IRRMOVQ, IOPQ } : valA;
-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IRMMOVB, IMRMOVB } : valC;
 	icode in { ICALL, IPUSHQ } : -8;
 	icode in { IRET, IPOPQ } : 8;
 	# Other instructions don't need ALU
@@ -164,7 +167,7 @@ word aluA = [
 ## Select input B to ALU
 word aluB = [
 	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
-		      IPUSHQ, IRET, IPOPQ } : valB;
+		      IPUSHQ, IRET, IPOPQ, IRMMOVB, IMRMOVB } : valB;
 	icode in { IRRMOVQ, IIRMOVQ } : 0;
 	# Other instructions don't need ALU
 ];
@@ -181,14 +184,14 @@ bool set_cc = icode in { IOPQ };
 ################ Memory Stage    ###################################
 
 ## Set read control signal
-bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET };
+bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET, IMRMOVB };
 
 ## Set write control signal
-bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL };
+bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL, IRMMOVB };
 
 ## Select memory address
 word mem_addr = [
-	icode in { IRMMOVQ, IPUSHQ, ICALL, IMRMOVQ } : valE;
+	icode in { IRMMOVQ, IPUSHQ, ICALL, IRMMOVB } : valE;
 	icode in { IPOPQ, IRET } : valA;
 	# Other instructions don't need address
 ];
@@ -196,7 +199,7 @@ word mem_addr = [
 ## Select memory input data
 word mem_data = [
 	# Value from register
-	icode in { IRMMOVQ, IPUSHQ } : valA;
+	icode in { IRMMOVQ, IPUSHQ, IRMMOVB } : valA;
 	# Return PC
 	icode == ICALL : valP;
 	# Default: Don't write anything
