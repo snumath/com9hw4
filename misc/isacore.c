@@ -94,7 +94,7 @@ cc_t compute_cc(alu_t op, word_t argA, word_t argB)
 	ovf = FALSE;
 	break;
 	case A_MUL:
-	ovf = (argA != 0 && ((argA * argB)/argA) != argB);
+	ovf = (argA != 0 && (val/argA) != argB);
 	break;
     default:
 	ovf = FALSE;
@@ -248,6 +248,7 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	set_reg_val(s->r, lo1, cval);
 	s->pc = ftpc;
 	break;
+
     case I_RMMOVQ:
 	if (!ok1) {
 	    if (error_file)
@@ -270,14 +271,45 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	}
 	if (reg_valid(lo1)) 
 	    cval += get_reg_val(s->r, lo1);
+
 	val = get_reg_val(s->r, hi1);
-	if (!set_word_val(s->m, cval, val)) {
-	    if (error_file)
+	val = 1;
+
+	if (!set_word_val(s->m, cval, val)){
+		if (error_file)
 		fprintf(error_file,
 			"PC = 0x%llx, Invalid data address 0x%llx\n",
 			s->pc, cval);
-	    return STAT_ADR;
+		return STAT_ADR;
 	}
+/*
+	if(lo1 != 0){
+		val = get_reg_val(s->r, hi1);
+
+		if (!set_word_val(s->m, cval, val)) {
+		    if (error_file)
+			fprintf(error_file,
+				"PC = 0x%llx, Invalid data address 0x%llx\n",
+				s->pc, cval);
+		    return STAT_ADR;
+		}
+	} else {
+		byte_t valT = 0;
+		if (!(hi1 >= REG_NONE))
+ 		   	get_byte_val(s->r,hi1*8, &valT);
+
+		val = valT;
+		
+		if (!set_byte_val(s->m, cval, valT)) {
+		    if (error_file)
+			fprintf(error_file,
+				"PC = 0x%llx, Invalid data address 0x%llx\n",
+				s->pc, cval);
+		    return STAT_ADR;
+		}
+	}
+	*/
+
 	s->pc = ftpc;
 	break;
 
@@ -309,6 +341,9 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	    return STAT_ADR;
 	set_reg_val(s->r, hi1, val);
 	s->pc = ftpc;
+
+	// MRMOVQ END
+
 	break;
     case I_ALU:
 	if (!ok1) {
@@ -320,7 +355,6 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	argA = get_reg_val(s->r, hi1);
 	argB = get_reg_val(s->r, lo1);
 	val = compute_alu(lo0, argA, argB);
-	set_reg_val(s->r, lo1, val);
 	s->cc = compute_cc(lo0, argA, argB);
 	s->pc = ftpc;
 	break;
@@ -427,7 +461,9 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	set_reg_val(s->r, hi1, val);
 	s->pc = ftpc;
 	break;
+
     case I_IADDQ:
+	printf("test");
 	if (!ok1) {
 	    if (error_file)
 		fprintf(error_file,
@@ -453,6 +489,9 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	set_reg_val(s->r, lo1, val);
 	s->cc = compute_cc(A_ADD, cval, argB);
 	s->pc = ftpc;
+
+	// IADDQ END
+
 	break;
     default:
 	if (error_file)

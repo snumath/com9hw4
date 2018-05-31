@@ -114,6 +114,10 @@ word_t gen_mem_read();
 word_t gen_mem_write();
 #ifdef SNU
 word_t gen_mem_byte();
+//word_t gen_mem_byte(){
+    //mem_byte = (((icode) == (I_RMMOVQ) || (icode) == (I_MRMOVQ)) && (ifun == 1));
+    //return (((icode) == (I_RMMOVQ) || (icode) == (I_MRMOVQ)) && (ifun == 1));
+//};
 #endif
 word_t gen_Stat();
 word_t gen_new_pc();
