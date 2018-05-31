@@ -81,9 +81,8 @@ long long gen_aluB()
 {
     return (((icode) == (I_RMMOVQ) || (icode) == (I_MRMOVQ) || (icode) == 
         (I_ALU) || (icode) == (I_CALL) || (icode) == (I_PUSHQ) || (icode)
-         == (I_RET) || (icode) == (I_POPQ)) ? (valb) : ((icode) == 
-        (I_RRMOVQ) || (icode) == (I_IRMOVQ) || (icode) == (I_IADDQ)) ? 0 : 0
-      );
+         == (I_RET) || (icode) == (I_POPQ) || (icode) == (I_IADDQ)) ? 
+      (valb) : ((icode) == (I_RRMOVQ) || (icode) == (I_IRMOVQ)) ? 0 : 0);
 }
 
 long long gen_alufun()
@@ -93,7 +92,7 @@ long long gen_alufun()
 
 long long gen_set_cc()
 {
-    return ((icode) == (I_ALU));
+    return ((icode) == (I_ALU) || (icode) == (I_IADDQ));
 }
 
 long long gen_mem_read()
@@ -111,8 +110,8 @@ long long gen_mem_write()
 long long gen_mem_addr()
 {
     return (((icode) == (I_RMMOVQ) || (icode) == (I_PUSHQ) || (icode) == 
-        (I_CALL)) ? (vale) : ((icode) == (I_POPQ) || (icode) == (I_RET)) ? 
-      (vala) : 0);
+        (I_CALL) || (icode) == (I_MRMOVQ)) ? (vale) : ((icode) == (I_POPQ)
+         || (icode) == (I_RET)) ? (vala) : 0);
 }
 
 long long gen_mem_data()
