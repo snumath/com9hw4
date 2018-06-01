@@ -4026,16 +4026,141 @@
                             | 
                             | 	# FILL HERE 
                             | 
+0x400: 30fd0300000000000000 | 	irmovq	$0x03, %r13
+0x40a: 30fb0100000000000000 | 	irmovq	$0x01, %r11
+0x414: 30fcfcffffffffffffff | 	irmovq	$0xfffffffffffffffc, %r12
+0x41e: 30f90000000000000000 | 	irmovq	$0x00, %r9
+0x428: 30f8ff00000000000000 | 	irmovq	$0xff, %r8
+0x432: a06f                 | 	pushq	%rsi
+0x434: a02f                 | 	pushq	%rdx
+                            | 
+0x436: 2060                 | 	rrmovq	%rsi, %rax
+0x438: 64d0                 | 	mulq	%r13, %rax
+0x43a: 62c0                 | 	andq	%r12, %rax
+                            | 
+0x43c: a00f                 | 	pushq	%rax
+                            | 
+0x43e: 50040800000000000000 | 	mrmovq	8(%rsp), %rax
+0x448: 50a40000000000000000 | 	mrmovq	(%rsp), %r10
+0x452: 64a0                 | 	mulq	%r10, %rax
+                            | 
+0x454: 6110                 | 	subq	%rcx, %rax
+0x456: 6110                 | 	subq	%rcx, %rax
+0x458: 6110                 | 	subq	%rcx, %rax
+0x45a: a00f                 | 	pushq	%rax
+                            | 
+0x45c: 50241000000000000000 | 	mrmovq	16(%rsp), %rdx
+0x466: 50641800000000000000 | 	mrmovq	24(%rsp), %rsi
                             | 
                             | 
+0x470:                      | L2:
+                            | 	#irmovb	$0x00, (%rdi)
+                            | 	#irmovb	$0x00, 1(%rdi)
+                            | 	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
+0x470: 40970000000000000000 | 	rmmovq	%r9, (%rdi)
+0x47a: 40970100000000000000 | 	rmmovq	%r9, 1(%rdi)
+0x484: 40870200000000000000 | 	rmmovq	%r8, 2(%rdi)
+                            | 
+0x48e: 50340800000000000000 | 	mrmovq	8(%rsp), %rbx
+0x498: 6037                 | 	addq	%rbx, %rdi
+                            | 	#addq	8(%rsp), %rdi	# (k,l) -> (k,l+1)
+                            | 
+0x49a: 61b2                 | 	subq	%r11, %rdx		# %rdx--, %rbx == 1
+                            | 
+                            | 	#cmpq	$0, %rdx		# %rdx > 0?
+0x49c: 61a6                 | 	subq	%r10, %rsi
+0x49e: 767004000000000000   | 	jg		L2
+                            | 
+0x4a7: 50340000000000000000 | 	mrmovq	(%rsp), %rbx
+0x4b1: 6137                 | 	subq	%rbx, %rdi
+                            | 	#subq	(%rsp), %rdi	# (k,top) -> (k+gap,bottom)
+                            | 
+0x4b3: 6116                 | 	subq	%rcx, %rsi		# %rsi -= gap
+                            | 
+0x4b5: 50241000000000000000 | 	mrmovq	16(%rsp), %rdx	# %rdx = height
                             | 
                             | 
+                            | 	#cmpq	$0, %rsi		# %rsi > 0?
+0x4bf: 61a6                 | 	subq	%r10, %rsi
+0x4c1: 767004000000000000   | 	jg		L2
                             | 
                             | 
+                            | 	#################################################
+                            | 	#		여기 밑에부터 밥먹고 합시다 ^~^			#
+                            | 	#################################################
                             | 
                             | 
+0x4ca: 50340000000000000000 | 	mrmovq	(%rsp), %rbx
+0x4d4: 6037                 | 	addq	%rbx, %rdi
+                            | 	#addq	(%rsp), %rdi
+                            | 
+0x4d6: 50340800000000000000 | 	mrmovq	8(%rsp), %rbx
+0x4e0: 6137                 | 	subq	%rbx, %rdi
+                            | 	#subq	8(%rsp), %rdi
+                            | 
+0x4e2: 61d7                 | 	subq	%r13, %rdi
+                            | 
+0x4e4: 6067                 | 	addq	%rsi, %rdi
+0x4e6: 6067                 | 	addq	%rsi, %rdi
+0x4e8: 6067                 | 	addq	%rsi, %rdi
+                            | 
+0x4ea: 6017                 | 	addq	%rcx, %rdi
+0x4ec: 6017                 | 	addq	%rcx, %rdi
+0x4ee: 6017                 | 	addq	%rcx, %rdi
+                            | 
+                            | 
+0x4f0: 50040800000000000000 | 	mrmovq	8(%rsp), %rax
+0x4fa: 6410                 | 	mulq	%rcx, %rax
+                            | 	#subq	8(%rsp), %rax
+                            | 
+0x4fc: 50341800000000000000 | 	mrmovq	24(%rsp), %rbx
+0x506: 6130                 | 	subq	%rbx, %rax
+0x508: 6130                 | 	subq	%rbx, %rax
+0x50a: 6130                 | 	subq	%rbx, %rax
+                            | 	#subq	24(%rsp), %rax
+                            | 	#subq	24(%rsp), %rax
+                            | 	#subq	24(%rsp), %rax
+                            | 
+0x50c: a00f                 | 	pushq	%rax
+                            | 
+0x50e: 50241800000000000000 | 	mrmovq	24(%rsp), %rdx	# %rdx = height
+0x518: 50642000000000000000 | 	mrmovq	32(%rsp), %rsi	# %rsi = width
+                            | 
+                            | 
+0x522:                      | L3:
+                            | 	#irmovb	$0x00, (%rdi)
+                            | 	#irmovb	$0x00, 1(%rdi)
+                            | 	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
+0x522: 40970000000000000000 | 	rmmovq	%r9, (%rdi)
+0x52c: 40970100000000000000 | 	rmmovq	%r9, 1(%rdi)
+0x536: 40870200000000000000 | 	rmmovq	%r8, 2(%rdi)
+0x540: 61d7                 | 	subq	%r13, %rdi		# (k,l) -> (k-1,l)
+                            | 	#decq	%rsi			# %rsi--
+0x542: 61b6                 | 	subq	%r11, %rsi
+                            | 
+                            | 	#cmpq	$0, %rsi		# %rsi > 0?
+0x544: 61a6                 | 	subq	%r10, %rsi
+0x546: 762205000000000000   | 	jg		L3
+                            | 
+0x54f: 50340000000000000000 | 	mrmovq	(%rsp), %rbx
+0x559: 6137                 | 	subq	%rbx, %rdi	# (end,l) -> (end,l-gap)
+                            | 
+0x55b: 6112                 | 	subq	%rcx, %rdx		# %rdx -= gap
+0x55d: 50642000000000000000 | 	mrmovq	32(%rsp), %rsi	# %rsi = width
+                            | 
+                            | 	#cmpq	$0, %rdx		# %rdx > 0?
+0x567: 61a6                 | 	subq	%r10, %rsi
+0x569: 762205000000000000   | 	jg		L3
+                            | 
+                            | 
+0x572: 50241800000000000000 | 	mrmovq	24(%rsp), %rdx	# %rdx = height
+                            | 	
                             | 
                             | 
                             |     # ----------------------------------------------------
                             | 
-0x400: 90                   | 	ret
+0x57c: b00f                 | 	popq	%rax
+0x57e: b00f                 | 	popq	%rax
+0x580: b02f                 | 	popq	%rdx
+0x582: b06f                 | 	popq	%rsi
+0x584: 90                   | 	ret

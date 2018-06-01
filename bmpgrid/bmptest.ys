@@ -4026,16 +4026,141 @@ bmp_grid:
 
 	# FILL HERE 
 
+	irmovq	$0x03, %r13
+	irmovq	$0x01, %r11
+	irmovq	$0xfffffffffffffffc, %r12
+	irmovq	$0x00, %r9
+	irmovq	$0xff, %r8
+	pushq	%rsi
+	pushq	%rdx
+
+	rrmovq	%rsi, %rax
+	mulq	%r13, %rax
+	andq	%r12, %rax
+
+	pushq	%rax
+
+	mrmovq	8(%rsp), %rax
+	mrmovq	(%rsp), %r10
+	mulq	%r10, %rax
+
+	subq	%rcx, %rax
+	subq	%rcx, %rax
+	subq	%rcx, %rax
+	pushq	%rax
+
+	mrmovq	16(%rsp), %rdx
+	mrmovq	24(%rsp), %rsi
 
 
+L2:
+	#irmovb	$0x00, (%rdi)
+	#irmovb	$0x00, 1(%rdi)
+	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
+	rmmovq	%r9, (%rdi)
+	rmmovq	%r9, 1(%rdi)
+	rmmovq	%r8, 2(%rdi)
+
+	mrmovq	8(%rsp), %rbx
+	addq	%rbx, %rdi
+	#addq	8(%rsp), %rdi	# (k,l) -> (k,l+1)
+
+	subq	%r11, %rdx		# %rdx--, %rbx == 1
+
+	#cmpq	$0, %rdx		# %rdx > 0?
+	subq	%r10, %rsi
+	jg		L2
+
+	mrmovq	(%rsp), %rbx
+	subq	%rbx, %rdi
+	#subq	(%rsp), %rdi	# (k,top) -> (k+gap,bottom)
+
+	subq	%rcx, %rsi		# %rsi -= gap
+
+	mrmovq	16(%rsp), %rdx	# %rdx = height
 
 
+	#cmpq	$0, %rsi		# %rsi > 0?
+	subq	%r10, %rsi
+	jg		L2
 
 
+	#################################################
+	#		여기 밑에부터 밥먹고 합시다 ^~^			#
+	#################################################
 
 
+	mrmovq	(%rsp), %rbx
+	addq	%rbx, %rdi
+	#addq	(%rsp), %rdi
+
+	mrmovq	8(%rsp), %rbx
+	subq	%rbx, %rdi
+	#subq	8(%rsp), %rdi
+
+	subq	%r13, %rdi
+
+	addq	%rsi, %rdi
+	addq	%rsi, %rdi
+	addq	%rsi, %rdi
+
+	addq	%rcx, %rdi
+	addq	%rcx, %rdi
+	addq	%rcx, %rdi
+
+
+	mrmovq	8(%rsp), %rax
+	mulq	%rcx, %rax
+	#subq	8(%rsp), %rax
+
+	mrmovq	24(%rsp), %rbx
+	subq	%rbx, %rax
+	subq	%rbx, %rax
+	subq	%rbx, %rax
+	#subq	24(%rsp), %rax
+	#subq	24(%rsp), %rax
+	#subq	24(%rsp), %rax
+
+	pushq	%rax
+
+	mrmovq	24(%rsp), %rdx	# %rdx = height
+	mrmovq	32(%rsp), %rsi	# %rsi = width
+
+
+L3:
+	#irmovb	$0x00, (%rdi)
+	#irmovb	$0x00, 1(%rdi)
+	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
+	rmmovq	%r9, (%rdi)
+	rmmovq	%r9, 1(%rdi)
+	rmmovq	%r8, 2(%rdi)
+	subq	%r13, %rdi		# (k,l) -> (k-1,l)
+	#decq	%rsi			# %rsi--
+	subq	%r11, %rsi
+
+	#cmpq	$0, %rsi		# %rsi > 0?
+	subq	%r10, %rsi
+	jg		L3
+
+	mrmovq	(%rsp), %rbx
+	subq	%rbx, %rdi	# (end,l) -> (end,l-gap)
+
+	subq	%rcx, %rdx		# %rdx -= gap
+	mrmovq	32(%rsp), %rsi	# %rsi = width
+
+	#cmpq	$0, %rdx		# %rdx > 0?
+	subq	%r10, %rsi
+	jg		L3
+
+
+	mrmovq	24(%rsp), %rdx	# %rdx = height
+	
 
 
     # ----------------------------------------------------
 
+	popq	%rax
+	popq	%rax
+	popq	%rdx
+	popq	%rsi
 	ret
