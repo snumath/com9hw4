@@ -270,7 +270,9 @@ stat_t step_state(state_ptr s, FILE *error_file)
 	}
 	if (reg_valid(lo1)) 
 	    cval += get_reg_val(s->r, lo1);
+	
 	val = get_reg_val(s->r, hi1);
+
 	if (!set_word_val(s->m, cval, val)) {
 	    if (error_file)
 		fprintf(error_file,
@@ -300,11 +302,14 @@ stat_t step_state(state_ptr s, FILE *error_file)
 			s->pc, hi1);
 	    return STAT_INS;
 	}
+
 	if (reg_valid(lo1)) 
 	    cval += get_reg_val(s->r, lo1);
 	if (!get_word_val(s->m, cval, &val))
 	    return STAT_ADR;
+		
 	set_reg_val(s->r, hi1, val);
+
 	s->pc = ftpc;
 	break;
     case I_ALU:

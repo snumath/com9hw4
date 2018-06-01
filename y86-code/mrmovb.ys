@@ -18,5 +18,8 @@
   rmmovq	%rax, (%rdx)
   mrmovb	2(%rdx), %rbx			
   mrmovb	4(%rdx), %rcx		# should sign-extended
+
+  irmovq  $0xffeeddccbbaa, %rax
+  rmmovb  %rax, (%rdx)
   halt
   

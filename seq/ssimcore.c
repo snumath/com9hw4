@@ -114,13 +114,10 @@ word_t gen_mem_read();
 word_t gen_mem_write();
 #ifdef SNU
 word_t gen_mem_byte();
-//word_t gen_mem_byte(){
-    //mem_byte = (((icode) == (I_RMMOVQ) || (icode) == (I_MRMOVQ)) && (ifun == 1));
-    //return (((icode) == (I_RMMOVQ) || (icode) == (I_MRMOVQ)) && (ifun == 1));
-//};
 #endif
 word_t gen_Stat();
 word_t gen_new_pc();
+
 
 /* Log file */
 FILE *dumpfile = NULL;
@@ -229,7 +226,10 @@ static void update_state()
 
     if (mem_write) {
       /* Should have already tested this address */
+      if (ifun == 0 || (icode != I_MRMOVQ && icode != I_RMMOVQ))
       set_word_val(mem, mem_addr, mem_data);
+      else
+      set_byte_val(mem, mem_addr, mem_data);
 	sim_log("Wrote 0x%llx to address 0x%llx\n", mem_data, mem_addr);
 #ifdef HAS_GUI
 	    if (gui_mode) {
@@ -315,8 +315,12 @@ static byte_t sim_step()
     }
     
     srcA = gen_srcA();
-    if (srcA != REG_NONE) {
-	vala = get_reg_val(reg, srcA);
+    if (srcA < REG_NONE) {
+    if (ifun == 0 || (icode != I_MRMOVQ && icode != I_RMMOVQ)){
+    get_word_val(reg,srcA*8, &vala);
+    } else{
+    get_byte_val(reg,srcA*8, (byte_t *)&vala);
+    }
     } else {
 	vala = 0;
     }
@@ -348,18 +352,23 @@ static byte_t sim_step()
 
 
     if (gen_mem_read()) {
+      if (ifun == 0 || (icode != I_MRMOVQ && icode != I_RMMOVQ))
       dmem_error = dmem_error || !get_word_val(mem, mem_addr, &valm);
+      else
+      dmem_error = dmem_error || !get_byte_val(mem, mem_addr, (byte_t *)&valm);
       if (dmem_error) {
 	sim_log("Couldn't read at address 0x%llx\n", mem_addr);
       }
     } else
       valm = 0;
-
     mem_write = gen_mem_write();
     if (mem_write) {
       /* Do a test read of the data memory to make sure address is OK */
       word_t junk;
+      if (ifun == 0 || (icode != I_MRMOVQ && icode != I_RMMOVQ))
       dmem_error = dmem_error || !get_word_val(mem, mem_addr, &junk);
+      else
+      dmem_error = dmem_error || !get_byte_val(mem, mem_addr, (byte_t *)&junk);
     }
 
     status = gen_Stat();

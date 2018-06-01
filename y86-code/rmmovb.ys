@@ -13,8 +13,8 @@
 
 # Test program for rmmovb instruction 
 
-  irmovq 	$0x100, %rdx
+  irmovq 	$0x2040, %rdx
   irmovq 	$0xcafebabe12345678, %rax
-  rmmovq 	%rax, (%rdx)
+  rmmovb 	%rax, (%rdx)
   halt
   
