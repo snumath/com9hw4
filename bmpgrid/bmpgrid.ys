@@ -55,35 +55,23 @@ bmp_grid:
 	mrmovq	24(%rsp), %rsi
 
 
+
+
+	mrmovq	8(%rsp), %r14
+	mrmovq	(%rsp), %rbx
+
+
 L2:
-	#irmovb	$0x00, (%rdi)
-	#irmovb	$0x00, 1(%rdi)
-	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
 	rmmovb	%r10, (%rdi)
 	rmmovb	%r10, 1(%rdi)
 	rmmovb	%r8, 2(%rdi)
-
-	mrmovq	8(%rsp), %rbx
-	addq	%rbx, %rdi
-	#addq	8(%rsp), %rdi	# (k,l) -> (k,l+1)
-
+	addq	%r14, %rdi
 	subq	%r11, %rdx		# %rdx--
-
-	#cmpq	$0, %rdx		# %rdx > 0?
-	subq	%r10, %rdx
 	jg		L2
 
-	mrmovq	(%rsp), %rbx
 	subq	%rbx, %rdi
-	#subq	(%rsp), %rdi	# (k,top) -> (k+gap,bottom)
-
 	subq	%rcx, %rsi		# %rsi -= gap
-
 	mrmovq	16(%rsp), %rdx	# %rdx = height
-
-
-	#cmpq	$0, %rsi		# %rsi > 0?
-	subq	%r10, %rsi
 	jg		L2
 
 
@@ -94,11 +82,9 @@ L2:
 
 	mrmovq	(%rsp), %rbx
 	addq	%rbx, %rdi
-	#addq	(%rsp), %rdi
 
 	mrmovq	8(%rsp), %rbx
 	subq	%rbx, %rdi
-	#subq	8(%rsp), %rdi
 
 	subq	%r13, %rdi
 
@@ -113,46 +99,29 @@ L2:
 	mrmovq	8(%rsp), %rax
 	mulq	%rcx, %rax
 
-
-	#subq	8(%rsp), %rax
-
 	mrmovq	24(%rsp), %rbx
 	subq	%rbx, %rax
 	subq	%rbx, %rax
 	subq	%rbx, %rax
-	#subq	24(%rsp), %rax
-	#subq	24(%rsp), %rax
-	#subq	24(%rsp), %rax
 
 	pushq	%rax
 
 	mrmovq	24(%rsp), %rdx	# %rdx = height
 	mrmovq	32(%rsp), %rsi	# %rsi = width
 
+	mrmovq	(%rsp), %rbx
 
 L3:
-	#irmovb	$0x00, (%rdi)
-	#irmovb	$0x00, 1(%rdi)
-	#irmovb	$0xff, 2(%rdi)	# *imgptr = (0,0,255)
 	rmmovb	%r10, (%rdi)
 	rmmovb	%r10, 1(%rdi)
 	rmmovb	%r8, 2(%rdi)
 	subq	%r13, %rdi		# (k,l) -> (k-1,l)
-	#decq	%rsi			# %rsi--
 	subq	%r11, %rsi
-
-	#cmpq	$0, %rsi		# %rsi > 0?
-	subq	%r10, %rsi
 	jg		L3
 
-	mrmovq	(%rsp), %rbx
-	subq	%rbx, %rdi	# (end,l) -> (end,l-gap)
-
-	subq	%rcx, %rdx		# %rdx -= gap
 	mrmovq	32(%rsp), %rsi	# %rsi = width
-
-	#cmpq	$0, %rdx		# %rdx > 0?
-	subq	%r10, %rdx
+	subq	%rbx, %rdi	# (end,l) -> (end,l-gap)
+	subq	%rcx, %rdx		# %rdx -= gap
 	jg		L3
 
 
